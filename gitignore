@@ -1,0 +1,37 @@
+# البيئة الافتراضية
+venv/
+env/
+ENV/
+.venv/
+
+# ملفات النماذج الكبيرة وذاكرة التخزين المؤقت
+*.pt
+*.pth
+*.bin
+*.h5
+__pycache__/
+*.pyc
+.pytorch_cache/
+cache/
+
+# ملفات الفيديو والصوت المؤقتة
+*.mp4
+*.mp3
+*.wav
+*.m4a
+*.webm
+*.avi
+*.mov
+temp*/
+tmp*/
+
+# ملفات النظام
+.DS_Store
+Thumbs.db
+
+# ملفات Hugging Face المحلية
+.models/
+.transformers/
+
+# ملفات Gradio المؤقتة
+gradio_cached_examples/
