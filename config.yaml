@@ -1,0 +1,38 @@
+# config/config.yaml
+
+# -----------------
+# إعدادات عامة (GLOBAL SETTINGS)
+# -----------------
+RANDOM_SEED: 42
+OUTPUT_MODEL_DIR: "models/"
+LOGS_DIR: "logs/"
+MODEL_FILENAME: "final_model.h5"
+
+# -----------------
+# إعدادات البيانات (DATA CONFIGURATION)
+# -----------------
+DATA_PATH: "data/raw/kashf_data.csv"
+TRAIN_CLEANED_PATH: "data/processed/train_data.csv"
+TEST_CLEANED_PATH: "data/processed/test_data.csv"
+TARGET_COLUMN: "label" # اسم العمود الهدف للتصنيف
+
+# -----------------
+# إعدادات المعالجة المسبقة (PREPROCESSING)
+# -----------------
+MAX_SEQUENCE_LENGTH: 256 # الحد الأقصى لطول الجملة/النص
+VOCAB_SIZE: 10000        # حجم المفردات
+EMBEDDING_DIM: 100       # بُعد التضمين (Embedding Dimension)
+USE_STOP_WORDS: True     # هل يتم إزالة الكلمات الموقوفة (Stop Words)
+ENCODING_TYPE: "utf-8"
+
+# -----------------
+# معاملات التدريب (TRAINING HYPERPARAMETERS)
+# -----------------
+MODEL_TYPE: "LSTM" # أو "BERT" أو "CNN"
+TEST_SIZE: 0.2     # نسبة بيانات الاختبار
+VALIDATION_SPLIT: 0.1
+BATCH_SIZE: 32
+EPOCHS: 10
+LEARNING_RATE: 0.001
+OPTIMIZER: "Adam"
+METRICS: ["accuracy", "f1_score"]
