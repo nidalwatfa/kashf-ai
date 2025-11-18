@@ -1,37 +1,45 @@
-# البيئة الافتراضية
+# Python
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# OS Generated Files
+.DS_Store
+.vscode/
+
+# Virtual Environment
+# يُوصى بتجاهل بيئة العمل الافتراضية
 venv/
 env/
-ENV/
-.venv/
+.env
 
-# ملفات النماذج الكبيرة وذاكرة التخزين المؤقت
+# Jupyter Notebook Files
+# تجاهل Checkpoints التي تنشئها دفاتر Jupyter
+.ipynb_checkpoints
+
+# Build/Dist files
+dist/
+build/
+*.egg-info/
+
+# Logs and Data
+logs/
+*.log
+*.sqlite
+data/
+!data/README.md # تجاهل محتويات مجلد البيانات، لكن أبقِ على ملف README إذا كان موجوداً
+
+# Machine Learning / AI
+# تجاهل النماذج المدربة الكبيرة (Model Artifacts)
+# إذا كنت تستخدم مجلد models/ لتخزينها
+models/
 *.pt
-*.pth
-*.bin
 *.h5
-__pycache__/
-*.pyc
-.pytorch_cache/
-cache/
+*.pkl
+*.bin
 
-# ملفات الفيديو والصوت المؤقتة
-*.mp4
-*.mp3
-*.wav
-*.m4a
-*.webm
-*.avi
-*.mov
-temp*/
-tmp*/
-
-# ملفات النظام
-.DS_Store
-Thumbs.db
-
-# ملفات Hugging Face المحلية
-.models/
-.transformers/
-
-# ملفات Gradio المؤقتة
-gradio_cached_examples/
+# Configuration/Secrets
+# ملفات قد تحتوي على مفاتيح سرية أو إعدادات محلية
+config.json
+secrets.py
