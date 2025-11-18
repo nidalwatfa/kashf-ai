@@ -1,89 +1,80 @@
+
 # src/data_processor.py
 
-# إضافة الاستيراد اللازم
-from tensorflow.keras.preprocessing.text import Tokenizer
-from tensorflow.keras.preprocessing.sequence import pad_sequences
-import pickle # لحفظ وتحميل الـ Tokenizer
-# ... (بقية الاستيرادات والدوال السابقة)
+# ... (بقية الاستيرادات: torch, pandas, sklearn, pyarabic, nltk, yaml, pickle)
+# يتم إزالة استيراد: from tensorflow.keras.preprocessing.text import Tokenizer
+# يتم إزالة استيراد: from tensorflow.keras.preprocessing.sequence import pad_sequences
 
-# ... (دوال load_config و clean_text_pipeline)
+# الاستيراد الجديد من torchtext
+from torchtext.legacy import data
+from torchtext.vocab import Vocab
 
-def save_tokenizer(tokenizer, path='models/tokenizer.pkl'):
-    """ حفظ كائن Tokenizer باستخدام pickle """
-    with open(path, 'wb') as handle:
-        pickle.dump(tokenizer, handle, protocol=pickle.HIGHEST_PROTOCOL)
-    print(f"تم حفظ الـ Tokenizer في: {path}")
+# (يجب أن تبقى دوال clean_text_pipeline، normalize_arabic، remove_stopwords، save_tokenizer كما هي)
 
-def load_tokenizer(path='models/tokenizer.pkl'):
-    """ تحميل كائن Tokenizer من المسار المحدد """
-    try:
-        with open(path, 'rb') as handle:
-            return pickle.load(handle)
-    except FileNotFoundError:
-        print(f"خطأ: لم يتم العثور على ملف الـ Tokenizer في المسار: {path}")
-        return None
+# -------------------------------------------------------------
 
 def load_and_preprocess_data(config):
     """
-    تحميل البيانات، التنظيف، إنشاء الـ Tokenizer، والتقسيم.
+    تحميل البيانات، تطبيق المعالجة المسبقة، وبناء الـ Field (المرممز) باستخدام torchtext.
     """
+    
     # ... (الجزء الأول: تحميل البيانات وتطبيق التنظيف)
     # df = pd.read_csv(...)
-    # df['text'] = df['text'].apply(clean_text_pipeline)
+    # df['text_content'] = df['text_content'].apply(clean_text_pipeline)
     
-    # 1. تقسيم البيانات الأولية (قبل الترميز)
-    X = df['text']
-    y = df[config['DATA_CONFIGURATION']['TARGET_COLUMN']]
-    X_train_text, X_test_text, y_train, y_test = train_test_split(
-        X, y, 
-        test_size=config['TRAINING_HYPERPARAMETERS']['TEST_SIZE'], 
-        random_state=config['GLOBAL_SETTINGS']['RANDOM_SEED'],
-        stratify=y 
-    )
-    
-    # 2. إنشاء وتدريب الـ Tokenizer على بيانات التدريب فقط!
-    # يجب أن يتم حفظ الـ Tokenizer في مجلد models/ لكي يتم تجاهله بـ .gitignore
-    vocab_size = config['PREPROCESSING']['VOCAB_SIZE']
-    
-    tokenizer = Tokenizer(
-        num_words=vocab_size,
-        oov_token="<unk>" # رمز للكلمات غير الموجودة في المفردات
-    )
-    # تدريب الـ Tokenizer على نصوص التدريب
-    tokenizer.fit_on_texts(X_train_text)
-    
-    # 3. حفظ الـ Tokenizer
-    tokenizer_path = config['GLOBAL_SETTINGS']['OUTPUT_MODEL_DIR'] + 'tokenizer.pkl'
-    save_tokenizer(tokenizer, tokenizer_path)
-    
-    # 4. تحويل النصوص إلى متسلسلات رقمية (Sequences)
-    X_train_sequences = tokenizer.texts_to_sequences(X_train_text)
-    X_test_sequences = tokenizer.texts_to_sequences(X_test_text)
-    
-    # 5. البادينغ (Padding)
-    max_len = config['PREPROCESSING']['MAX_SEQUENCE_LENGTH']
-    
-    X_train_padded = pad_sequences(
-        X_train_sequences,
-        maxlen=max_len,
-        padding='post', # إضافة الأصفار بعد النص
-        truncating='post' # قطع النص من النهاية إذا كان أطول من max_len
-    )
-    X_test_padded = pad_sequences(
-        X_test_sequences,
-        maxlen=max_len,
-        padding='post',
-        truncating='post'
-    )
-    
-    # 6. التحويل إلى مُتجهات PyTorch
-    X_train_tensor = torch.tensor(X_train_padded).long()
-    X_test_tensor = torch.tensor(X_test_padded).long()
-    
-    # تحويل الفئة المستهدفة إلى متجهات PyTorch
-    y_train_tensor = torch.tensor(y_train.values).float().unsqueeze(1)
-    y_test_tensor = torch.tensor(y_test.values).float().unsqueeze(1)
+    # 1. تعريف وظيفة الـ Tokenizer (سنستخدم دالة split() البسيطة)
+    def tokenizer_func(text):
+        # هنا يمكنك استخدام nltk.word_tokenize أو split() بعد التنظيف
+        return text.split()
 
-    print(f"تم ترميز وتجهيز البيانات بنجاح.")
+    # 2. تعريف الـ Field (يحتوي على تعليمات المعالجة)
+    MAX_LEN = config['PREPROCESSING']['MAX_SEQUENCE_LENGTH']
     
-    return X_train_tensor, X_test_tensor, y_train_tensor, y_test_tensor
+    TEXT = data.Field(
+        tokenize=tokenizer_func,
+        lower=True, # تحويل إلى أحرف صغيرة (لغير العربية)
+        include_lengths=False, # لا نحتاج لأطوال النصوص في هذا النموذج
+        batch_first=True,
+        fix_length=MAX_LEN
+    )
+    
+    LABEL = data.Field(sequential=False, use_vocab=False, dtype=torch.float)
+    
+    # 3. تقسيم البيانات إلى مجموعات (نستخدم pandas/sklearn أولاً لضمان التحكم)
+    # X_train_text, X_test_text, y_train_series, y_test_series = train_test_split(...)
+    
+    # 4. تحويل البيانات إلى تنسيق (Dataset) من torchtext
+    # (هنا يتم تطبيق الـ Tokenization والـ Padding تلقائياً عبر Field)
+    
+    # يجب أن تكون البيانات في شكل قائمة من القوائم (List of Lists) ليتم التعامل معها من قبل torchtext
+    fields = [('text', TEXT), ('label', LABEL)]
+    
+    # إنشاء قائمة الأمثلة (Examples)
+    train_examples = []
+    for text, label in zip(X_train_text, y_train_series):
+        train_examples.append(data.Example.fromlist([text, label], fields))
+
+    test_examples = []
+    for text, label in zip(X_test_text, y_test_series):
+        test_examples.append(data.Example.fromlist([text, label], fields))
+        
+    train_data = data.Dataset(train_examples, fields)
+    test_data = data.Dataset(test_examples, fields)
+
+    # 5. بناء قاموس المفردات (Vocabulary)
+    # يستخدم بيانات التدريب فقط لحساب تكرارات الكلمات
+    TEXT.build_vocab(train_data, max_size=config['PREPROCESSING']['VOCAB_SIZE'], min_freq=2)
+    
+    # 6. حفظ قاموس المفردات للوصول إلى المفردات في نموذج التنبؤ
+    vocab_path = config['GLOBAL_SETTINGS']['OUTPUT_MODEL_DIR'] + 'vocab.pkl'
+    save_tokenizer(TEXT.vocab, vocab_path)
+    
+    # 7. إنشاء أدوات تحميل البيانات (Data Loaders) - تستخدم في train.py
+    BATCH_SIZE = config['TRAINING_HYPERPARAMETERS']['BATCH_SIZE']
+    
+    train_iterator = data.BucketIterator(train_data, batch_size=BATCH_SIZE, device=torch.device('cpu'))
+    test_iterator = data.BucketIterator(test_data, batch_size=BATCH_SIZE, device=torch.device('cpu'))
+    
+    # في هذه الحالة، يتم تمرير الـ Iterators ومعلومات المفردات إلى train.py
+    
+    return train_iterator, test_iterator, len(TEXT.vocab)
