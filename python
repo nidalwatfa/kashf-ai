@@ -1,0 +1,46 @@
+# app.py
+
+import streamlit as st
+import google.generativeai as ai # مكتبة Gemini
+import os
+
+# 1. إعداد المفتاح (يجب وضعه كمتغير بيئة)
+# st.secrets هي طريقة Streamlit الآمنة للتعامل مع المفاتيح
+try:
+    API_KEY = st.secrets["GEMINI_API_KEY"]
+except KeyError:
+    # رسالة خطأ إذا لم يتم إعداد المفتاح بشكل صحيح
+    st.error("خطأ: مفتاح GEMINI_API_KEY غير موجود. يرجى إعداده.")
+    st.stop()
+    
+ai.configure(api_key=API_KEY)
+
+# 2. إعداد الواجهة
+st.title("كاشف AI: التفاعل مع نموذج Gemini")
+st.markdown("---")
+
+# 3. اختيار النموذج
+model_options = [model.name for model in ai.list_models() if "generateContent" in model.supported_generation_methods]
+selected_model = st.selectbox("اختر نموذج Gemini:", model_options, index=model_options.index("google/gemini-2.5-flash"))
+
+# 4. إدخال النص ومعالجة الرد
+prompt = st.text_area("اسألني أي شيء...", placeholder="اكتب استفسارك هنا...")
+
+if st.button("إرسال النص"):
+    if prompt:
+        with st.spinner('جاري توليد الرد...'):
+            try:
+                # توليد المحتوى
+                response = ai.generate_content(
+                    model=selected_model,
+                    contents=prompt
+                )
+                
+                # عرض الرد
+                st.subheader("الإجابة:")
+                st.markdown(response.text)
+                
+            except Exception as e:
+                st.error(f"حدث خطأ أثناء الاتصال بالنموذج: {e}")
+    else:
+        st.warning("الرجاء إدخال سؤال لبدء التفاعل.")
