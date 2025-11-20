@@ -1,0 +1,2 @@
+# .streamlit/secrets.toml
+GEMINI_API_KEY = "هنا_تضع_مفتاح_API_الخاص_بك"
