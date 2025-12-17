@@ -1,4 +1,11 @@
-import gradio as gr
+import gradio as grtry:
+    import torch
+    TORCH_AVAILABLE = True
+except ImportError:
+    TORCH_AVAILABLE = False
+
+if not TORCH_AVAILABLE:
+    print("⚠️ مكتبة Torch غير متاحة على هذه البيئة. سيتم تشغيل الوضع التجريبي فقط.")
 import torch
 import cv2
 import numpy as np

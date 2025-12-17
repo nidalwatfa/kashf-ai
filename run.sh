@@ -1,11 +1,9 @@
-#!/bin/bash
+numpy
+scipy
+pandas
+matplotlib
+librosa
+soundfile
+opencv-python
+PyYAML
 
-# تفعيل البيئة الافتراضية
-source venv/bin/activate    # لينكس/ماك
-# .\venv\Scripts\activate    # ويندوز (غيّر السطر إذا كنت على ويندوز)
-
-# تشغيل التطبيق
-echo "جاري تشغيل كشف AI ... 🔥"
-python app.py
-
-# إذا انقطع التشغيل، تظل البيئة مفعّلة عشان تقدر تعيد التشغيل بسهولة

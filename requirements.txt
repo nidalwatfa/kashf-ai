@@ -1,5 +1,6 @@
 # ... (بقية المكتبات)
-torch>=2.0.0
+# torch>=2.0.0
 # يتم إضافة torchtext هنا
-torchtext>=0.17.0
+# torchtext>=0.17.0
+
 
