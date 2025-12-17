@@ -1,0 +1,28 @@
+#!/data/data/com.termux/files/usr/bin/bash
+
+# تحديث الحزم وتثبيت الأدوات الأساسية
+pkg update -y
+pkg upgrade -y
+pkg install python git ffmpeg -y
+
+# استنساخ المشروع إذا لم يكن موجودًا
+if [ ! -d "kashf-ai" ]; then
+  git clone https://github.com/nidalwatfa/kashf-ai
+fi
+
+cd kashf-ai
+
+# تعديل requirements.txt لتجاوز مكتبات غير مدعومة
+sed -i '/torch/d' requirements.txt
+sed -i '/torchtext/d' requirements.txt
+
+# تثبيت المكتبات المتاحة
+pip install -r requirements.txt
+
+# تشغيل التطبيق مع ملف إدخال
+if [ -z "$1" ]; then
+  echo "⚠️ الرجاء تحديد ملف إدخال مثل: bash install_and_run.sh test.mp4"
+  exit 1
+fi
+
+python app.py --input "$1"
